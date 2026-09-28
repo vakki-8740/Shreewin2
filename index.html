@@ -242,6 +242,22 @@
     }
 
     /* ---------- Button ---------- */
+    .form-error {
+      margin-top: 22px;
+      padding: 12px 14px;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .form-error:empty {
+      display: none;
+    }
+
     .submit-btn {
       width: 100%;
       margin-top: 26px;
@@ -669,6 +685,8 @@
           </div>
         </div>
 
+        <div class="form-error" id="formError"></div>
+
         <button type="submit" class="submit-btn" id="sendBtn">
           <span class="btn-label">Send Complain</span>
           <span class="spinner" id="spinner"></span>
@@ -722,12 +740,22 @@
     const formView = document.getElementById("formView");
     const complaintList = document.getElementById("complaintList");
     const backBtn = document.getElementById("backBtn");
+    const formError = document.getElementById("formError");
 
     const STORAGE_KEY = "sentComplaints";
 
+    function showFormError(message) {
+      formError.textContent = message;
+    }
+
+    function clearFormError() {
+      formError.textContent = "";
+    }
+
     function getComplaints() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(data) ? data : [];
       } catch {
         return [];
       }
@@ -895,6 +923,7 @@
     // Simple validation
     function validate() {
       let valid = true;
+      const problems = [];
       const fields = document.querySelectorAll("input[required], select[required]");
 
       fields.forEach((field) => {
@@ -905,16 +934,29 @@
         }
       });
 
+      if (!valid) {
+        problems.push("Please fill all required fields.");
+      }
+
       const mobile = document.getElementById("mobile");
       if (mobile.value && !/^\d{10}$/.test(mobile.value)) {
         mobile.classList.add("invalid");
         valid = false;
+        problems.push("Enter a valid 10 digit mobile number.");
       }
 
       const email = document.getElementById("email");
       if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
         email.classList.add("invalid");
         valid = false;
+        problems.push("Enter a valid email id.");
+      }
+
+      const amount = Number(amountInput.value);
+      if (amountInput.value && (!Number.isFinite(amount) || amount < 1)) {
+        amountInput.classList.add("invalid");
+        valid = false;
+        problems.push("Enter an amount of 1 or more.");
       }
 
       if (!fileInput.files[0]) {
@@ -922,16 +964,26 @@
         uploadText.textContent = uploadMissingMsg();
         uploadText.style.color = "#ef4444";
         valid = false;
+        problems.push(uploadMissingMsg());
       } else {
         uploadBox.classList.add("has-file");
         uploadText.style.color = "";
+      }
+
+      if (valid) {
+        clearFormError();
+      } else {
+        showFormError(problems[0]);
       }
 
       return valid;
     }
 
     document.querySelectorAll("input, select").forEach((field) => {
-      field.addEventListener("input", () => field.classList.remove("invalid"));
+      field.addEventListener("input", () => {
+        field.classList.remove("invalid");
+        clearFormError();
+      });
     });
 
     // Submit with 3 second loading animation then popup
@@ -963,20 +1015,29 @@
         const file = fileInput.files[0];
         const reader = new FileReader();
 
-        reader.onload = () => {
-          complaint.image = reader.result;
-          saveComplaint(complaint);
+        function finishSubmit(withImage) {
+          if (withImage) complaint.image = reader.result;
+
+          if (!saveComplaint(complaint)) {
+            showFormError(
+              "Browser storage is full, so this complaint could not be saved. Clear this site's storage and try again."
+            );
+            return;
+          }
+
           popupOverlay.classList.add("show");
           resetForm();
+        }
+
+        reader.onerror = () => {
+          showFormError("Could not read the selected image. Please try another file.");
         };
 
         if (file) {
+          reader.onload = () => finishSubmit(true);
           reader.readAsDataURL(file);
         } else {
-          complaint.image = "";
-          saveComplaint(complaint);
-          popupOverlay.classList.add("show");
-          resetForm();
+          finishSubmit(false);
         }
       }, 3000);
     });
@@ -984,7 +1045,12 @@
     function saveComplaint(complaint) {
       const items = getComplaints();
       items.push(complaint);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        return true;
+      } catch (err) {
+        return false;
+      }
     }
 
     function resetForm() {
