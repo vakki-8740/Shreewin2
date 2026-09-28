@@ -190,6 +190,33 @@
       margin-top: 2px;
     }
 
+    .cr-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #9ca3af;
+      margin-top: 3px;
+    }
+
+    .cr-status .pdot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      flex: none;
+    }
+
+    .cr-status.on {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .cr-status.on .pdot {
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    }
+
     .cr-meta {
       text-align: right;
       font-size: 11.5px;
@@ -1096,6 +1123,11 @@
     let roomUnsub = null;
     let chatsUnsub = null;
     let chatThreads = [];
+    let presenceMap = {};
+    let presenceUnsub = null;
+    let roomThread = null;
+    let statusSig = "";
+    const PRESENCE_WINDOW = 75000;
 
     const toastEl = document.getElementById("toast");
     let toastTimer = null;
@@ -1332,6 +1364,7 @@
       hideAllViews();
       currentId = null;
       currentChatId = id;
+      roomThread = null;
       chatRoomView.style.display = "block";
       document.getElementById("roomName").textContent = name || "Chat";
       document.getElementById("roomMeta").textContent = "Loading...";
@@ -1360,6 +1393,18 @@
     window.__adminSettings = fillSettings;
 
     /* ---------- Chats ---------- */
+    const USER_ICON_SVG =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='24' fill='%23e2e8f0'/%3E%3Ccircle cx='24' cy='19' r='8' fill='%2364748b'/%3E%3Cpath d='M8 44c0-8.8 7.2-14 16-14s16 5.2 16 14' fill='%2364748b'/%3E%3C/svg%3E";
+
+    function chatAvatarFallback(img) {
+      if (img.dataset.stage !== "svg") {
+        img.dataset.stage = "svg";
+        img.src = USER_ICON_SVG;
+        return;
+      }
+      img.onerror = null;
+    }
+
     function chatWhenReady(tries) {
       if (window.__chatAdmin) return Promise.resolve(window.__chatAdmin);
       const n = tries || 0;
@@ -1375,6 +1420,7 @@
         roomUnsub = null;
       }
       currentChatId = null;
+      roomThread = null;
     }
 
     function fmtShort(ts) {
@@ -1403,17 +1449,24 @@
       return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     }
 
+    function isUserOnline(id) {
+      const seen = presenceMap[id];
+      return !!seen && Date.now() - seen < PRESENCE_WINDOW;
+    }
+
     function renderChats() {
       const box = document.getElementById("chatsList");
 
       if (!chatThreads.length) {
         box.innerHTML = '<p class="loading">No chats yet.</p>';
+        statusSig = "";
         return;
       }
 
       box.innerHTML = "";
 
       chatThreads.forEach((t) => {
+        const online = isUserOnline(t.id);
         const row = document.createElement("div");
         row.className = "chat-row";
         row.dataset.chatId = t.id;
@@ -1421,9 +1474,13 @@
         row.innerHTML =
           '<div class="avatar"><img src="user-icons/' +
           encodeURIComponent(t.userName || "user") +
-          '.png" alt="" onerror="avatarFallback(this)"></div>' +
+          '.png" alt="" onerror="chatAvatarFallback(this)"></div>' +
           '<div class="cr-body"><div class="cr-name">' +
           esc(t.userName || "Guest") +
+          '</div><div class="cr-status' +
+          (online ? " on" : "") +
+          '"><span class="pdot"></span>' +
+          (online ? "Online" : "Offline") +
           '</div><div class="cr-last">' +
           esc(t.lastMessage || "No messages") +
           "</div></div>" +
@@ -1437,6 +1494,39 @@
 
         box.appendChild(row);
       });
+
+      statusSig = chatThreads.map((t) => t.id + (isUserOnline(t.id) ? "1" : "0")).join(",");
+    }
+
+    function paintRoomMeta() {
+      if (!roomThread) return;
+
+      const el = document.getElementById("roomMeta");
+      const online = isUserOnline(currentChatId);
+      const state = roomThread.status === "closed" ? "Closed" : "Open";
+
+      el.textContent =
+        fmtFull(roomThread.lastAt || roomThread.createdAt) +
+        " · " +
+        state +
+        " · " +
+        (online ? "Online" : "Offline");
+    }
+
+    function startPresenceWatch(tries) {
+      if (window.__chatAdmin) {
+        if (presenceUnsub) return;
+
+        presenceUnsub = window.__chatAdmin.watchPresence((map) => {
+          presenceMap = map || {};
+          renderChats();
+          paintRoomMeta();
+        });
+        return;
+      }
+
+      const n = tries || 0;
+      if (n < 60) setTimeout(() => startPresenceWatch(n + 1), 500);
     }
 
     function startChatsWatch(tries) {
@@ -1539,11 +1629,8 @@
           roomUnsub = api.watchMessages(id, renderRoom);
           api.watchThread(id, (thread) => {
             if (currentChatId !== id) return;
-            document.getElementById("roomMeta").textContent = thread
-              ? fmtFull(thread.lastAt || thread.createdAt) +
-                " · " +
-                (thread.status === "closed" ? "Closed" : "Open")
-              : "";
+            roomThread = thread;
+            paintRoomMeta();
           });
         })
         .catch(() => {
@@ -1768,6 +1855,16 @@
     };
 
     startChatsWatch();
+    startPresenceWatch();
+
+    setInterval(() => {
+      if (!chatThreads.length) return;
+      const sig = chatThreads.map((t) => t.id + (isUserOnline(t.id) ? "1" : "0")).join(",");
+      if (sig !== statusSig) {
+        renderChats();
+        paintRoomMeta();
+      }
+    }, 10000);
   </script>
 
   <script type="module">
@@ -1892,6 +1989,21 @@
 
         deleteMessage(chatId, id) {
           return deleteDoc(doc(db, "chats", chatId, "messages", id));
+        },
+
+        watchPresence(onMap) {
+          return onSnapshot(
+            collection(db, "presence"),
+            (snap) => {
+              const map = {};
+              snap.docs.forEach((d) => {
+                const data = d.data() || {};
+                map[d.id] = data.lastSeen || 0;
+              });
+              onMap(map);
+            },
+            () => onMap({})
+          );
         },
       };
 

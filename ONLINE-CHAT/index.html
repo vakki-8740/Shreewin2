@@ -833,7 +833,7 @@
   <!-- Chat app -->
   <div class="app" id="app" hidden>
     <header class="chat-header">
-      <img class="admin-logo" id="adminLogo" src="ADMIN-CHAT-LOGO.png" alt="Support" />
+      <img class="admin-logo" id="adminLogo" src="ADMIN-CHAY-ICON/photo_2026-09-29_00-44-42.jpg" alt="Support" />
       <div class="head-info">
         <div class="head-name">SHREEWIN HELP CENTER</div>
         <div class="head-status">
@@ -970,18 +970,26 @@
     let replyTarget = null;
     let activeMsg = null;
     let adminLastSeen = 0;
+    let presenceTimer = null;
     let toastTimer = null;
     let bottomAnchor = null;
 
     const FALLBACK_LOGO =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-9 2-9 5v1h18v-1c0-3-5-5-9-5Z'/%3E%3C/svg%3E";
 
+    const LOGO_CHAIN = [
+      "ADMIN-CHAY-ICON/photo_2026-09-29_00-44-42.jpg",
+      "ADMIN-CHAT-LOGO.png",
+      "../logo/images__1_-removebg-preview.png",
+      FALLBACK_LOGO,
+    ];
+
     let logoStage = 0;
     const adminLogo = document.getElementById("adminLogo");
     adminLogo.addEventListener("error", () => {
       logoStage += 1;
-      if (logoStage === 1) {
-        adminLogo.src = "../logo/images__1_-removebg-preview.png";
+      if (logoStage < LOGO_CHAIN.length) {
+        adminLogo.src = LOGO_CHAIN[logoStage];
       } else {
         adminLogo.onerror = null;
         adminLogo.src = FALLBACK_LOGO;
@@ -1070,6 +1078,11 @@
             adminLastSeen = lastSeen || 0;
             paintStatus();
           });
+
+          const beatPresence = () => api.touchPresence(chatId, guestName);
+          beatPresence();
+          clearInterval(presenceTimer);
+          presenceTimer = setInterval(beatPresence, 20000);
         })
         .catch((err) => {
           showToast("Could not connect: " + (err && err.message ? err.message : err));
@@ -1609,6 +1622,14 @@
             (snap) => onLastSeen(snap.exists() ? snap.data().lastSeen || 0 : 0),
             () => onLastSeen(0)
           );
+        },
+
+        touchPresence(chatId, userName) {
+          return setDoc(
+            doc(db, "presence", chatId),
+            { online: true, lastSeen: Date.now(), userName: userName || "" },
+            { merge: true }
+          ).catch(() => {});
         },
       };
     } catch (err) {
