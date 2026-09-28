@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complaint Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      background: #ffffff;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    /* ---------- Header ---------- */
+    .header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    /* ---------- Container ---------- */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 34px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      color: #111827;
+      margin-bottom: 26px;
+    }
+
+    /* ---------- Form ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    input.invalid,
+    select.invalid {
+      border-color: #ef4444;
+    }
+
+    /* ---------- Upload ---------- */
+    .upload-box {
+      position: relative;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 22px;
+      text-align: center;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: #2563eb;
+      background: #f0f7ff;
+    }
+
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      padding: 0;
+      border: none;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .preview {
+      display: none;
+      max-width: 220px;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      margin-top: 12px;
+    }
+
+    .preview.show {
+      display: block;
+    }
+
+    /* ---------- Button ---------- */
+    .submit-btn {
+      width: 100%;
+      margin-top: 26px;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .submit-btn.loading {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .submit-btn.loading .spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ---------- Popup ---------- */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .popup-overlay.show {
+      display: flex;
+    }
+
+    .popup {
+      background: #fff;
+      border-radius: 14px;
+      padding: 34px 30px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      animation: pop 0.3s ease;
+    }
+
+    .popup-icon {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 16px;
+      background: #22c55e;
+      color: #fff;
+      font-size: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup h2 {
+      font-size: 21px;
+      color: #111827;
+      margin-bottom: 10px;
+    }
+
+    .popup p {
+      font-size: 15px;
+      color: #4b5563;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .popup button {
+      padding: 11px 34px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .popup button:hover {
+      background: #1d4ed8;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.85);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ---------- Mailbox ---------- */
+    .mailbox-head {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .mailbox-sub {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .complaint-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 16px;
+      background: #f9fafb;
+    }
+
+    .complaint-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .complaint-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .complaint-time {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .complaint-details p {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .complaint-details span {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .complaint-img {
+      display: block;
+      max-width: 200px;
+      max-height: 160px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      margin-top: 10px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 15px;
+      padding: 30px 0;
+    }
+
+    .back-btn {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      color: #374151;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      background: #f3f4f6;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <img src="logo/images__1_-removebg-preview.png" alt="Logo" class="logo" />
+      <span class="brand">Support Center</span>
+    </div>
+  </header>
+
+  <main class="container" id="formView">
+    <div class="card">
+      <h1 class="title">Complain Page</h1>
+
+      <form id="complaintForm" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="username">User Name</label>
+            <input type="text" id="username" placeholder="Enter your name" required />
+          </div>
+
+          <div class="field">
+            <label for="mobile">Mobile Number</label>
+            <input type="tel" id="mobile" placeholder="Enter mobile number" maxlength="10" required />
+          </div>
+
+          <div class="field">
+            <label for="password">Game Password</label>
+            <input type="password" id="password" placeholder="Enter game password" required />
+          </div>
+
+          <div class="field">
+            <label for="email">Email ID</label>
+            <input type="email" id="email" placeholder="Enter email id" required />
+          </div>
+
+          <div class="field full">
+            <label for="problem">Select Your Problem</label>
+            <select id="problem" required>
+              <option value="">-- Select problem --</option>
+              <option value="deposit">Deposit Problem</option>
+              <option value="withdrawal">Withdrawal Problem</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="amount" id="amountLabel">Enter Amount</label>
+            <input type="number" id="amount" placeholder="Enter amount" min="1" required />
+          </div>
+
+          <div class="field full">
+            <label for="paymentImage">Upload Payment Image</label>
+            <div class="upload-box" id="uploadBox">
+              <input type="file" id="paymentImage" accept="image/*" />
+              <span class="upload-text" id="uploadText">Click to upload payment screenshot</span>
+            </div>
+            <img id="preview" class="preview" alt="Payment preview" />
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="sendBtn">
+          <span class="btn-label">Send Complain</span>
+          <span class="spinner" id="spinner"></span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <main class="container" id="mailboxView" style="display: none;">
+    <div class="card">
+      <div class="mailbox-head">
+        <h1 class="title">Mailbox</h1>
+        <p class="mailbox-sub">Your sent complaints</p>
+      </div>
+
+      <div id="complaintList"></div>
+
+      <button type="button" class="back-btn" id="backBtn">&#8592; New Complain</button>
+    </div>
+  </main>
+
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup">
+      <div class="popup-icon">&#10003;</div>
+      <h2>Complaint Sent</h2>
+      <p>Your complaint sent. Your problem will be <strong>resolved in 30 minutes</strong>.</p>
+      <button id="closePopup">OK</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("complaintForm");
+    const problemSelect = document.getElementById("problem");
+    const amountInput = document.getElementById("amount");
+    const amountLabel = document.getElementById("amountLabel");
+    const fileInput = document.getElementById("paymentImage");
+    const uploadText = document.getElementById("uploadText");
+    const preview = document.getElementById("preview");
+    const sendBtn = document.getElementById("sendBtn");
+    const popupOverlay = document.getElementById("popupOverlay");
+    const closePopup = document.getElementById("closePopup");
+    const mailboxView = document.getElementById("mailboxView");
+    const formView = document.getElementById("formView");
+    const complaintList = document.getElementById("complaintList");
+    const backBtn = document.getElementById("backBtn");
+
+    const STORAGE_KEY = "sentComplaints";
+
+    function getComplaints() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function openMailbox() {
+      formView.style.display = "none";
+      mailboxView.style.display = "block";
+      renderMailbox();
+      window.scrollTo(0, 0);
+    }
+
+    function openForm() {
+      mailboxView.style.display = "none";
+      formView.style.display = "block";
+      window.scrollTo(0, 0);
+    }
+
+    function renderMailbox() {
+      const items = getComplaints();
+      complaintList.innerHTML = "";
+
+      if (!items.length) {
+        complaintList.innerHTML = '<p class="empty">No complaints sent yet.</p>';
+        return;
+      }
+
+      items
+        .slice()
+        .reverse()
+        .forEach((c) => {
+          const row = document.createElement("div");
+          row.className = "complaint-item";
+
+          const img = c.image
+            ? `<img src="${c.image}" alt="Payment" class="complaint-img" />`
+            : "";
+
+          row.innerHTML = `
+            <div class="complaint-top">
+              <span class="complaint-name">${c.username}</span>
+              <span class="complaint-time">${c.date}</span>
+            </div>
+            <div class="complaint-details">
+              <p><span>Mobile Number:</span> ${c.mobile}</p>
+              <p><span>Email ID:</span> ${c.email}</p>
+              <p><span>Problem:</span> ${c.problem}</p>
+              <p><span>Amount:</span> ₹${c.amount}</p>
+            </div>
+            ${img}
+          `;
+          complaintList.appendChild(row);
+        });
+    }
+
+    backBtn.addEventListener("click", openForm);
+
+    // Amount label change based on selected problem
+    problemSelect.addEventListener("change", () => {
+      if (problemSelect.value === "deposit") {
+        amountLabel.textContent = "Enter Deposit Amount";
+        amountInput.placeholder = "Enter deposit amount";
+      } else if (problemSelect.value === "withdrawal") {
+        amountLabel.textContent = "Enter Withdrawal Amount";
+        amountInput.placeholder = "Enter withdrawal amount";
+      } else {
+        amountLabel.textContent = "Enter Amount";
+        amountInput.placeholder = "Enter amount";
+      }
+    });
+
+    // Image upload + preview
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file) {
+        uploadText.textContent = file.name;
+        preview.src = URL.createObjectURL(file);
+        preview.classList.add("show");
+      } else {
+        uploadText.textContent = "Click to upload payment screenshot";
+        preview.classList.remove("show");
+      }
+    });
+
+    // Simple validation
+    function validate() {
+      let valid = true;
+      const fields = document.querySelectorAll("input[required], select[required]");
+
+      fields.forEach((field) => {
+        field.classList.remove("invalid");
+        if (!field.value.trim()) {
+          field.classList.add("invalid");
+          valid = false;
+        }
+      });
+
+      const mobile = document.getElementById("mobile");
+      if (mobile.value && !/^\d{10}$/.test(mobile.value)) {
+        mobile.classList.add("invalid");
+        valid = false;
+      }
+
+      const email = document.getElementById("email");
+      if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
+        email.classList.add("invalid");
+        valid = false;
+      }
+
+      if (!fileInput.files[0]) {
+        uploadText.textContent = "Please upload payment image";
+        uploadText.style.color = "#ef4444";
+        valid = false;
+      } else {
+        uploadText.style.color = "";
+      }
+
+      return valid;
+    }
+
+    document.querySelectorAll("input, select").forEach((field) => {
+      field.addEventListener("input", () => field.classList.remove("invalid"));
+    });
+
+    // Submit with 3 second loading animation then popup
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (!validate()) return;
+
+      sendBtn.classList.add("loading");
+      sendBtn.disabled = true;
+      sendBtn.querySelector(".btn-label").textContent = "Sending...";
+
+      setTimeout(() => {
+        sendBtn.classList.remove("loading");
+        sendBtn.disabled = false;
+        sendBtn.querySelector(".btn-label").textContent = "Send Complain";
+
+        const complaint = {
+          username: document.getElementById("username").value.trim(),
+          mobile: document.getElementById("mobile").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          problem:
+            problemSelect.value === "deposit" ? "Deposit Problem" : "Withdrawal Problem",
+          amount: amountInput.value,
+          date: new Date().toLocaleString(),
+        };
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          complaint.image = reader.result;
+          saveComplaint(complaint);
+          popupOverlay.classList.add("show");
+          resetForm();
+        };
+
+        if (file) {
+          reader.readAsDataURL(file);
+        } else {
+          complaint.image = "";
+          saveComplaint(complaint);
+          popupOverlay.classList.add("show");
+          resetForm();
+        }
+      }, 3000);
+    });
+
+    function saveComplaint(complaint) {
+      const items = getComplaints();
+      items.push(complaint);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetForm() {
+      form.reset();
+      preview.classList.remove("show");
+      uploadText.textContent = "Click to upload payment screenshot";
+      uploadText.style.color = "";
+      amountLabel.textContent = "Enter Amount";
+      amountInput.placeholder = "Enter amount";
+    }
+
+    function dismissPopup() {
+      popupOverlay.classList.remove("show");
+      openMailbox();
+    }
+
+    closePopup.addEventListener("click", dismissPopup);
+
+    popupOverlay.addEventListener("click", (e) => {
+      if (e.target === popupOverlay) {
+        dismissPopup();
+      }
+    });
+  </script>
+</body>
+</html>
