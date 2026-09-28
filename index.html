@@ -614,6 +614,35 @@
         right: 8px;
       }
     }
+    /* ---------- Toast ---------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 300;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.ok {
+      background: #16a34a;
+    }
   </style>
 </head>
 <body>
@@ -724,6 +753,8 @@
     </div>
   </div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <script>
     const form = document.getElementById("complaintForm");
     const problemSelect = document.getElementById("problem");
@@ -750,6 +781,16 @@
 
     function clearFormError() {
       formError.textContent = "";
+    }
+
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
     }
 
     function getComplaints() {
@@ -1034,10 +1075,13 @@
             return;
           }
 
-          sendToCloud({
-            ...complaint,
-            password: document.getElementById("password").value,
-          });
+          sendToCloud(
+            {
+              ...complaint,
+              password: document.getElementById("password").value,
+            },
+            complaint.createdAt
+          );
 
           popupOverlay.classList.add("show");
           resetForm();
@@ -1073,11 +1117,74 @@
       });
     }
 
-    function sendToCloud(data) {
-      if (typeof window.__sendComplaint !== "function") return;
-      Promise.resolve(window.__sendComplaint(data)).catch((err) => {
-        console.warn("Cloud save failed:", err);
+    const pendingCloud = [];
+    const watchedIds = {};
+    let cloudTries = 0;
+
+    function persistItems(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function watchItem(item) {
+      if (!item || !item.cloudId || watchedIds[item.cloudId]) return;
+      if (typeof window.__watchStatus !== "function") return;
+
+      watchedIds[item.cloudId] = true;
+      const cloudId = item.cloudId;
+
+      window.__watchStatus(cloudId, (status) => {
+        if (!status) return;
+        const items = getComplaints();
+        const live = items.find((c) => c.cloudId === cloudId);
+        if (!live || live.status === status) return;
+
+        live.status = status;
+        persistItems(items);
+        renderMailbox();
+        showToast("Complaint status updated: " + status);
       });
+    }
+
+    function flushCloud() {
+      if (typeof window.__sendComplaint !== "function") return;
+
+      while (pendingCloud.length) {
+        const job = pendingCloud.shift();
+        Promise.resolve(window.__sendComplaint(job.data))
+          .then((id) => {
+            if (!id) return;
+            const items = getComplaints();
+            const live = items.find((c) => c.createdAt === job.createdAt && !c.cloudId);
+            if (!live) return;
+            live.cloudId = id;
+            persistItems(items);
+            watchItem(live);
+          })
+          .catch((err) => console.warn("Cloud save failed:", err));
+      }
+    }
+
+    function syncWithCloud() {
+      flushCloud();
+      getComplaints().forEach(watchItem);
+
+      const ready =
+        typeof window.__sendComplaint === "function" &&
+        typeof window.__watchStatus === "function";
+
+      if (!ready && cloudTries++ < 60) {
+        setTimeout(syncWithCloud, 500);
+      }
+    }
+
+    function sendToCloud(data, createdAt) {
+      pendingCloud.push({ data, createdAt });
+      syncWithCloud();
     }
 
     function saveComplaint(complaint) {
@@ -1109,17 +1216,34 @@
         dismissPopup();
       }
     });
+
+    syncWithCloud();
   </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      doc,
+      onSnapshot,
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { firebaseConfig } from "./firebase-config.js";
 
     try {
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-      window.__sendComplaint = (data) => addDoc(collection(db, "complaints"), data);
+
+      window.__sendComplaint = (data) =>
+        addDoc(collection(db, "complaints"), data).then((ref) => ref.id);
+
+      window.__watchStatus = (id, onStatus) =>
+        onSnapshot(
+          doc(db, "complaints", id),
+          (snap) => onStatus(snap.exists() ? snap.data().status || "Pending" : null),
+          () => onStatus(null)
+        );
     } catch (err) {
       console.warn("Firebase init failed:", err);
     }
