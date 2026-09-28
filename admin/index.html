@@ -57,6 +57,74 @@
       text-transform: uppercase;
     }
 
+    .settings-btn {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      color: #111827;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 9px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .settings-btn:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    .settings-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: #111827;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .field {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .field span {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .field small {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
     /* ---------- Container ---------- */
     .container {
       max-width: 900px;
@@ -562,6 +630,10 @@
     <div class="header-inner">
       <img src="logo/images__1_-removebg-preview.png" alt="Logo" class="logo" />
       <span class="brand">Support Center<small>Admin Panel</small></span>
+      <button type="button" class="settings-btn" id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.33.43.57.79.66H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+        Settings
+      </button>
     </div>
   </header>
 
@@ -594,6 +666,43 @@
     </div>
   </main>
 
+  <main class="container" id="settingsView" style="display: none;">
+    <div class="card">
+      <div class="list-head">
+        <h2>Settings</h2>
+      </div>
+
+      <div id="settingsError"></div>
+
+      <form id="settingsForm" novalidate>
+        <label class="field" for="setChatUrl">
+          <span>Online Chat URL</span>
+          <input type="url" id="setChatUrl" placeholder="https://t.me/your_username" autocomplete="off" />
+          <small>User panel ke "ONLINE CHAT" button par click karne par isi URL par open hoga. Khali chhodoge to button dikhega nahi.</small>
+        </label>
+
+        <label class="field" for="setToken">
+          <span>Telegram Bot Token</span>
+          <input type="text" id="setToken" placeholder="123456789:AAH..." autocomplete="off" />
+          <small>@BotFather se mila hua token. Har naye complaint par isi se alert bhejega.</small>
+        </label>
+
+        <label class="field" for="setChatId">
+          <span>Telegram Chat ID</span>
+          <input type="text" id="setChatId" placeholder="-100123456789" autocomplete="off" />
+          <small>Group ka chat id (negative number) ya aapka personal user id.</small>
+        </label>
+
+        <button type="submit" class="btn btn-blue" id="saveSettingsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Save Settings
+        </button>
+      </form>
+    </div>
+
+    <button type="button" class="back-btn" id="settingsBackBtn">&#8592; All Complaints</button>
+  </main>
+
   <div class="img-overlay" id="imgOverlay">
     <div class="img-modal">
       <button type="button" class="img-close" id="imgClose" aria-label="Close image">&times;</button>
@@ -609,11 +718,16 @@
 
     const listView = document.getElementById("listView");
     const detailView = document.getElementById("detailView");
+    const settingsView = document.getElementById("settingsView");
     const complaintList = document.getElementById("complaintList");
     const detailContent = document.getElementById("detailContent");
     const errorBox = document.getElementById("errorBox");
     const imgOverlay = document.getElementById("imgOverlay");
     const imgView = document.getElementById("imgView");
+    const settingsError = document.getElementById("settingsError");
+    const setChatUrl = document.getElementById("setChatUrl");
+    const setToken = document.getElementById("setToken");
+    const setChatId = document.getElementById("setChatId");
 
     let docs = [];
     let currentId = null;
@@ -808,6 +922,7 @@
     function openDetail(id) {
       currentId = id;
       listView.style.display = "none";
+      settingsView.style.display = "none";
       detailView.style.display = "block";
       renderDetail();
       window.scrollTo(0, 0);
@@ -816,10 +931,73 @@
     function openList() {
       currentId = null;
       detailView.style.display = "none";
+      settingsView.style.display = "none";
       listView.style.display = "block";
       renderList();
       window.scrollTo(0, 0);
     }
+
+    function openSettings() {
+      currentId = null;
+      listView.style.display = "none";
+      detailView.style.display = "none";
+      settingsView.style.display = "block";
+      settingsError.textContent = "";
+      window.scrollTo(0, 0);
+    }
+
+    function fillSettings(data) {
+      const fields = [
+        [setChatUrl, data.chatUrl],
+        [setToken, data.telegramToken],
+        [setChatId, data.telegramChatId],
+      ];
+
+      fields.forEach(([input, value]) => {
+        if (document.activeElement === input) return;
+        input.value = value == null ? "" : String(value);
+      });
+    }
+
+    document.getElementById("settingsBtn").addEventListener("click", openSettings);
+    document.getElementById("settingsBackBtn").addEventListener("click", openList);
+
+    window.__adminSettings = fillSettings;
+
+    document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        chatUrl: setChatUrl.value.trim(),
+        telegramToken: setToken.value.trim(),
+        telegramChatId: setChatId.value.trim(),
+      };
+
+      if (payload.chatUrl && !/^https?:\/\//i.test(payload.chatUrl)) {
+        settingsError.textContent = "Online Chat URL must start with http:// or https://";
+        return;
+      }
+
+      settingsError.textContent = "";
+
+      const btn = document.getElementById("saveSettingsBtn");
+      btn.disabled = true;
+
+      try {
+        if (typeof window.__saveSettings !== "function") {
+          throw new Error("connection not ready");
+        }
+        await Promise.resolve(window.__saveSettings(payload));
+        settingsError.textContent = "";
+        showToast("Settings saved", "ok");
+      } catch (err) {
+        const message = err && err.message ? err.message : String(err);
+        settingsError.textContent = "Settings not saved: " + message;
+        showToast("Settings save failed", "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     function openImageView(src) {
       imgView.src = src;
@@ -870,6 +1048,7 @@
       doc,
       deleteDoc,
       updateDoc,
+      setDoc,
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { firebaseConfig } from "./firebase-config.js";
 
@@ -877,6 +1056,7 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const col = collection(db, "complaints");
+      const settingsRef = doc(db, "settings", "app");
 
       onSnapshot(
         col,
@@ -909,6 +1089,14 @@
             window.__adminError("Status update failed: " + err.message);
             return false;
           });
+
+      window.__saveSettings = (data) => setDoc(settingsRef, data, { merge: true });
+
+      onSnapshot(
+        settingsRef,
+        (snap) => window.__adminSettings(snap.exists() ? snap.data() : {}),
+        () => {}
+      );
     } catch (err) {
       window.__adminRender([]);
       window.__adminError("Firebase init failed: " + (err && err.message ? err.message : err));

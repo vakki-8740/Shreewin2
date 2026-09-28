@@ -9,6 +9,12 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // App settings: online chat URL + telegram alert config.
+    // NOTE: the telegram bot token is readable by anyone who can read this doc.
+    match /settings/{docId} {
+      allow read, write: if true;
+    }
+
     // Everything else stays locked.
     match /{document=**} {
       allow read, write: if false;
