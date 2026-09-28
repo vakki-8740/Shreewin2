@@ -973,9 +973,15 @@
         telegramChatId: setChatId.value.trim(),
       };
 
-      if (payload.chatUrl && !/^https?:\/\//i.test(payload.chatUrl)) {
-        settingsError.textContent = "Online Chat URL must start with http:// or https://";
-        return;
+      if (payload.chatUrl) {
+        const isHttp = /^https?:\/\//i.test(payload.chatUrl);
+        const isPath =
+          !payload.chatUrl.includes("://") && !/^(javascript|data|vbscript):/i.test(payload.chatUrl);
+        if (!isHttp && !isPath) {
+          settingsError.textContent =
+            "Enter a full URL (https://...) or a page path like ONLINE-CHAT/index.html";
+          return;
+        }
       }
 
       settingsError.textContent = "";
@@ -1097,6 +1103,13 @@
         (snap) => window.__adminSettings(snap.exists() ? snap.data() : {}),
         () => {}
       );
+
+      const presenceRef = doc(db, "presence", "admin");
+      const beatPresence = () =>
+        setDoc(presenceRef, { online: true, lastSeen: Date.now() }, { merge: true }).catch(() => {});
+
+      beatPresence();
+      setInterval(beatPresence, 20000);
     } catch (err) {
       window.__adminRender([]);
       window.__adminError("Firebase init failed: " + (err && err.message ? err.message : err));

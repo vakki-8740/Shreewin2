@@ -15,6 +15,20 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Chat threads + messages.
+    match /chats/{chatId} {
+      allow read, write: if true;
+
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+    }
+
+    // Presence (online / offline).
+    match /presence/{docId} {
+      allow read, write: if true;
+    }
+
     // Everything else stays locked.
     match /{document=**} {
       allow read, write: if false;
