@@ -58,7 +58,6 @@
     }
 
     .settings-btn {
-      margin-left: auto;
       display: inline-flex;
       align-items: center;
       gap: 7px;
@@ -72,6 +71,15 @@
       border-radius: 10px;
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .settings-btn:hover {
@@ -123,6 +131,309 @@
       outline: none;
       border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* ---------- Chats ---------- */
+    .chat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      background: #fff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .chat-row:hover {
+      border-color: #c7d2fe;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+    }
+
+    .chat-row .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #f1f5f9;
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-row .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cr-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cr-name {
+      font-weight: 700;
+      font-size: 14.5px;
+    }
+
+    .cr-last {
+      font-size: 13px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .cr-meta {
+      text-align: right;
+      font-size: 11.5px;
+      color: #9ca3af;
+      flex: none;
+    }
+
+    .chip {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #2563eb;
+      margin-top: 5px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .chip.closed {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .room-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 14px;
+    }
+
+    .room-title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .room-title b {
+      display: block;
+      font-size: 16px;
+    }
+
+    .room-title span {
+      display: block;
+      font-size: 12.5px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .room-msgs {
+      height: 52vh;
+      min-height: 280px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .room-msgs .empty {
+      margin: auto;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .amsg {
+      max-width: 74%;
+      padding: 8px 11px 6px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      align-self: flex-start;
+      position: relative;
+      font-size: 14px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .amsg.mine {
+      align-self: flex-end;
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+
+    .amsg .reply-quote {
+      border-left: 3px solid currentColor;
+      padding: 2px 7px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      opacity: 0.85;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .amsg.mine .reply-quote {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .amsg .reply-quote b {
+      display: block;
+      font-size: 11px;
+    }
+
+    .amsg img.att {
+      display: block;
+      max-width: 230px;
+      border-radius: 9px;
+      cursor: zoom-in;
+      margin: 2px 0;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .amsg .mt {
+      font-size: 10.5px;
+      opacity: 0.68;
+      text-align: right;
+      margin-top: 3px;
+    }
+
+    .adel {
+      position: absolute;
+      top: -9px;
+      right: -9px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      color: #dc2626;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .afile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 11px;
+      padding: 9px;
+      min-width: 200px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .amsg.mine .afile {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .afile .file-ico {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: #ef4444;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+    }
+
+    .afile .file-meta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .afile .file-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .afile .file-sub {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .room-composer {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      align-items: center;
+    }
+
+    .room-composer input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 11px 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .room-composer input[type="text"]:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: #f1f5f9;
+      color: #2563eb;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* ---------- Container ---------- */
@@ -630,10 +941,16 @@
     <div class="header-inner">
       <img src="logo/images__1_-removebg-preview.png" alt="Logo" class="logo" />
       <span class="brand">Support Center<small>Admin Panel</small></span>
-      <button type="button" class="settings-btn" id="settingsBtn" title="Settings">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.33.43.57.79.66H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-        Settings
-      </button>
+      <div class="header-actions">
+        <button type="button" class="settings-btn" id="chatsBtn" title="Chats">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"></path></svg>
+          Chats
+        </button>
+        <button type="button" class="settings-btn" id="settingsBtn" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.33.43.57.79.66H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          Settings
+        </button>
+      </div>
     </div>
   </header>
 
@@ -703,6 +1020,50 @@
     <button type="button" class="back-btn" id="settingsBackBtn">&#8592; All Complaints</button>
   </main>
 
+  <main class="container" id="chatsView" style="display: none;">
+    <div class="card">
+      <div class="list-head">
+        <h2>Chats</h2>
+      </div>
+
+      <div id="chatsError"></div>
+      <div id="chatsList"><p class="loading">Loading chats...</p></div>
+    </div>
+
+    <button type="button" class="back-btn" id="chatsBackBtn">&#8592; All Complaints</button>
+  </main>
+
+  <main class="container" id="chatRoomView" style="display: none;">
+    <div class="card">
+      <div class="room-head">
+        <div class="room-title">
+          <b id="roomName">Chat</b>
+          <span id="roomMeta"></span>
+        </div>
+        <button type="button" class="back-btn" id="roomCloseBtn">&#8592; Chats</button>
+      </div>
+
+      <div class="room-msgs" id="roomMsgs"><p class="empty">Loading messages...</p></div>
+
+      <form class="room-composer" id="roomForm">
+        <button type="button" class="icon-btn" id="roomImgBtn" title="Send image" aria-label="Send image">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg>
+        </button>
+        <button type="button" class="icon-btn" id="roomFileBtn" title="Send file or PDF" aria-label="Send file or PDF">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+        </button>
+        <input type="text" id="roomInput" placeholder="Type a reply" autocomplete="off" maxlength="2000" />
+        <button type="submit" class="btn btn-blue" id="roomSendBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
+          Send
+        </button>
+      </form>
+
+      <input type="file" id="roomImgInput" accept="image/*" hidden />
+      <input type="file" id="roomFileInput" hidden />
+    </div>
+  </main>
+
   <div class="img-overlay" id="imgOverlay">
     <div class="img-modal">
       <button type="button" class="img-close" id="imgClose" aria-label="Close image">&times;</button>
@@ -731,6 +1092,10 @@
 
     let docs = [];
     let currentId = null;
+    let currentChatId = null;
+    let roomUnsub = null;
+    let chatsUnsub = null;
+    let chatThreads = [];
 
     const toastEl = document.getElementById("toast");
     let toastTimer = null;
@@ -919,30 +1284,60 @@
       });
     }
 
-    function openDetail(id) {
-      currentId = id;
+    function hideAllViews() {
       listView.style.display = "none";
+      detailView.style.display = "none";
       settingsView.style.display = "none";
+      chatsView.style.display = "none";
+      chatRoomView.style.display = "none";
+    }
+
+    function openDetail(id) {
+      hideAllViews();
+      currentId = id;
       detailView.style.display = "block";
       renderDetail();
       window.scrollTo(0, 0);
     }
 
     function openList() {
+      leaveRoom();
+      hideAllViews();
       currentId = null;
-      detailView.style.display = "none";
-      settingsView.style.display = "none";
       listView.style.display = "block";
       renderList();
       window.scrollTo(0, 0);
     }
 
     function openSettings() {
+      leaveRoom();
+      hideAllViews();
       currentId = null;
-      listView.style.display = "none";
-      detailView.style.display = "none";
       settingsView.style.display = "block";
       settingsError.textContent = "";
+      window.scrollTo(0, 0);
+    }
+
+    function openChats() {
+      leaveRoom();
+      hideAllViews();
+      currentId = null;
+      chatsView.style.display = "block";
+      document.getElementById("chatsError").textContent = "";
+      renderChats();
+      window.scrollTo(0, 0);
+    }
+
+    function openChatRoom(id, name) {
+      hideAllViews();
+      currentId = null;
+      currentChatId = id;
+      chatRoomView.style.display = "block";
+      document.getElementById("roomName").textContent = name || "Chat";
+      document.getElementById("roomMeta").textContent = "Loading...";
+      document.getElementById("roomMsgs").innerHTML = '<p class="empty">Loading messages...</p>';
+      document.getElementById("roomInput").value = "";
+      watchRoom(id);
       window.scrollTo(0, 0);
     }
 
@@ -963,6 +1358,329 @@
     document.getElementById("settingsBackBtn").addEventListener("click", openList);
 
     window.__adminSettings = fillSettings;
+
+    /* ---------- Chats ---------- */
+    function chatWhenReady(tries) {
+      if (window.__chatAdmin) return Promise.resolve(window.__chatAdmin);
+      const n = tries || 0;
+      if (n > 60) return Promise.reject(new Error("connection not ready"));
+      return new Promise((r) => setTimeout(r, 500)).then(() => chatWhenReady(n + 1));
+    }
+
+    function leaveRoom() {
+      if (roomUnsub) {
+        try {
+          roomUnsub();
+        } catch {}
+        roomUnsub = null;
+      }
+      currentChatId = null;
+    }
+
+    function fmtShort(ts) {
+      if (!ts) return "";
+      const d = new Date(ts);
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      if (sameDay) return time;
+      return d.toLocaleDateString([], { day: "2-digit", month: "short" }) + " " + time;
+    }
+
+    function fmtFull(ts) {
+      const d = new Date(ts || Date.now());
+      return (
+        d.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" }) +
+        " · " +
+        d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      );
+    }
+
+    function fmtSize(bytes) {
+      if (!bytes && bytes !== 0) return "";
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function renderChats() {
+      const box = document.getElementById("chatsList");
+
+      if (!chatThreads.length) {
+        box.innerHTML = '<p class="loading">No chats yet.</p>';
+        return;
+      }
+
+      box.innerHTML = "";
+
+      chatThreads.forEach((t) => {
+        const row = document.createElement("div");
+        row.className = "chat-row";
+        row.dataset.chatId = t.id;
+
+        row.innerHTML =
+          '<div class="avatar"><img src="user-icons/' +
+          encodeURIComponent(t.userName || "user") +
+          '.png" alt="" onerror="avatarFallback(this)"></div>' +
+          '<div class="cr-body"><div class="cr-name">' +
+          esc(t.userName || "Guest") +
+          '</div><div class="cr-last">' +
+          esc(t.lastMessage || "No messages") +
+          "</div></div>" +
+          '<div class="cr-meta">' +
+          esc(fmtShort(t.lastAt)) +
+          '<br><span class="chip' +
+          (t.status === "closed" ? " closed" : "") +
+          '">' +
+          (t.status === "closed" ? "Closed" : "Open") +
+          "</span></div>";
+
+        box.appendChild(row);
+      });
+    }
+
+    function startChatsWatch(tries) {
+      if (window.__chatAdmin) {
+        if (chatsUnsub) return;
+        chatsUnsub = window.__chatAdmin.watchChats((items) => {
+          chatThreads = items;
+          document.getElementById("chatsError").textContent = "";
+          renderChats();
+        });
+        return;
+      }
+
+      const n = tries || 0;
+      if (n < 60) setTimeout(() => startChatsWatch(n + 1), 500);
+    }
+
+    function buildRoomMessage(m) {
+      const mine = m.sender === "admin";
+      const el = document.createElement("div");
+      el.className = "amsg" + (mine ? " mine" : "");
+
+      let inner = "";
+
+      if (m.replyTo) {
+        inner +=
+          '<div class="reply-quote"><b>' +
+          esc(m.replyTo.sender === "admin" ? "You" : "User") +
+          "</b>" +
+          esc(m.replyTo.text || "Attachment") +
+          "</div>";
+      }
+
+      if (m.type === "image") {
+        inner += '<img class="att" src="' + m.data + '" alt="' + esc(m.fileName || "image") + '" />';
+      } else if (m.type === "file") {
+        inner +=
+          '<a class="afile" href="' +
+          m.data +
+          '" download="' +
+          esc(m.fileName || "file") +
+          '">' +
+          '<div class="file-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg></div>' +
+          '<div class="file-meta"><div class="file-name">' +
+          esc(m.fileName || "file") +
+          '</div><div class="file-sub">' +
+          esc((m.fileType || "File") + " · " + fmtSize(m.fileSize)) +
+          "</div></div></a>";
+      } else {
+        inner += esc(m.text);
+      }
+
+      inner += '<div class="mt">' + esc(fmtFull(m.createdAt)) + "</div>";
+      inner += '<button type="button" class="adel" title="Delete" aria-label="Delete">&times;</button>';
+
+      el.innerHTML = inner;
+
+      el.querySelector(".adel").addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!confirm("Delete this message?")) return;
+        chatWhenReady()
+          .then((api) => api.deleteMessage(currentChatId, m.id))
+          .catch((err) => showToast("Delete failed: " + (err && err.message ? err.message : err), "err"));
+      });
+
+      const img = el.querySelector("img.att");
+      if (img) {
+        img.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openImageView(m.data);
+        });
+      }
+
+      return el;
+    }
+
+    function renderRoom(items) {
+      const box = document.getElementById("roomMsgs");
+      box.innerHTML = "";
+
+      if (!items.length) {
+        box.innerHTML = '<p class="empty">No messages yet.</p>';
+        return;
+      }
+
+      items.forEach((m) => box.appendChild(buildRoomMessage(m)));
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function watchRoom(id) {
+      if (roomUnsub) {
+        try {
+          roomUnsub();
+        } catch {}
+        roomUnsub = null;
+      }
+
+      chatWhenReady()
+        .then((api) => {
+          roomUnsub = api.watchMessages(id, renderRoom);
+          api.watchThread(id, (thread) => {
+            if (currentChatId !== id) return;
+            document.getElementById("roomMeta").textContent = thread
+              ? fmtFull(thread.lastAt || thread.createdAt) +
+                " · " +
+                (thread.status === "closed" ? "Closed" : "Open")
+              : "";
+          });
+        })
+        .catch(() => {
+          document.getElementById("roomMsgs").innerHTML =
+            '<p class="empty">Could not connect. Check Firestore rules.</p>';
+        });
+    }
+
+    function compressImage(file, maxEdge, quality) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+          const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Image could not be read"));
+        };
+
+        img.src = url;
+      });
+    }
+
+    function sendRoom(payload) {
+      if (!currentChatId) return Promise.reject(new Error("no chat open"));
+
+      return chatWhenReady()
+        .then((api) => api.sendMessage(currentChatId, payload))
+        .catch((err) => {
+          showToast("Send failed: " + (err && err.message ? err.message : err), "err");
+          throw err;
+        });
+    }
+
+    document.getElementById("chatsBtn").addEventListener("click", openChats);
+    document.getElementById("chatsBackBtn").addEventListener("click", openList);
+    document.getElementById("roomCloseBtn").addEventListener("click", openChats);
+
+    document.getElementById("chatsList").addEventListener("click", (e) => {
+      const row = e.target.closest("[data-chat-id]");
+      if (!row) return;
+      const thread = chatThreads.find((t) => t.id === row.dataset.chatId);
+      openChatRoom(row.dataset.chatId, thread ? thread.userName : "Chat");
+    });
+
+    document.getElementById("roomForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("roomInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = "";
+
+      sendRoom({
+        sender: "admin",
+        type: "text",
+        text: text,
+        createdAt: Date.now(),
+        edited: false,
+      }).then(() => {
+        const box = document.getElementById("roomMsgs");
+        box.scrollTop = box.scrollHeight;
+      });
+    });
+
+    document.getElementById("roomImgBtn").addEventListener("click", () =>
+      document.getElementById("roomImgInput").click()
+    );
+    document.getElementById("roomFileBtn").addEventListener("click", () =>
+      document.getElementById("roomFileInput").click()
+    );
+
+    document.getElementById("roomImgInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        showToast("Please choose an image file.", "err");
+        return;
+      }
+
+      try {
+        const data = await compressImage(file, 1200, 0.75);
+        await sendRoom({
+          sender: "admin",
+          type: "image",
+          data: data,
+          fileName: file.name,
+          fileSize: file.size,
+          createdAt: Date.now(),
+        });
+      } catch (err) {
+        showToast("Image failed: " + (err && err.message ? err.message : err), "err");
+      }
+    });
+
+    const MAX_ROOM_FILE = 600 * 1024;
+
+    document.getElementById("roomFileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+
+      if (file.size > MAX_ROOM_FILE) {
+        showToast("File too large. Maximum size is 600 KB.", "err");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        sendRoom({
+          sender: "admin",
+          type: "file",
+          data: reader.result,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: (file.type || "File").split("/").pop().toUpperCase(),
+          createdAt: Date.now(),
+        });
+      };
+
+      reader.onerror = () => showToast("Could not read that file.", "err");
+      reader.readAsDataURL(file);
+    });
 
     document.getElementById("settingsForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1043,6 +1761,13 @@
     };
 
     window.__adminError = showError;
+
+    window.__chatsError = (message) => {
+      const box = document.getElementById("chatsError");
+      if (box) box.textContent = message || "";
+    };
+
+    startChatsWatch();
   </script>
 
   <script type="module">
@@ -1052,6 +1777,7 @@
       collection,
       onSnapshot,
       doc,
+      addDoc,
       deleteDoc,
       updateDoc,
       setDoc,
@@ -1110,6 +1836,66 @@
 
       beatPresence();
       setInterval(beatPresence, 20000);
+
+      window.__chatAdmin = {
+        watchChats(onItems) {
+          return onSnapshot(
+            collection(db, "chats"),
+            (snap) => {
+              const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+              items.sort((a, b) => (b.lastAt || b.createdAt || 0) - (a.lastAt || a.createdAt || 0));
+              onItems(items);
+            },
+            (err) => {
+              window.__chatsError("Could not load chats: " + (err && err.message ? err.message : err));
+              onItems([]);
+            }
+          );
+        },
+
+        watchThread(id, onThread) {
+          return onSnapshot(
+            doc(db, "chats", id),
+            (snap) => onThread(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+            () => onThread(null)
+          );
+        },
+
+        watchMessages(chatId, onItems) {
+          return onSnapshot(
+            collection(db, "chats", chatId, "messages"),
+            (snap) => {
+              const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+              items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+              onItems(items);
+            },
+            () => onItems([])
+          );
+        },
+
+        async sendMessage(chatId, data) {
+          const ref = await addDoc(collection(db, "chats", chatId, "messages"), data);
+          const preview =
+            data.type === "text" ? data.text : data.type === "image" ? "Image" : data.fileName || "File";
+
+          const fields = {
+            lastMessage: preview.slice(0, 120),
+            lastAt: data.createdAt,
+            updatedAt: Date.now(),
+          };
+
+          if (data.userName) fields.userName = data.userName;
+
+          await setDoc(doc(db, "chats", chatId), fields, { merge: true });
+          return ref.id;
+        },
+
+        deleteMessage(chatId, id) {
+          return deleteDoc(doc(db, "chats", chatId, "messages", id));
+        },
+      };
+
+      startChatsWatch();
     } catch (err) {
       window.__adminRender([]);
       window.__adminError("Firebase init failed: " + (err && err.message ? err.message : err));
