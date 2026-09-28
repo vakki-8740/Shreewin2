@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Complaints collection - open read/write (no login).
+    // NOTE: anyone with the web config can read, create, update and delete
+    // these documents, including the password field.
+    match /complaints/{complaintId} {
+      allow read, write: if true;
+    }
+
+    // Everything else stays locked.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
