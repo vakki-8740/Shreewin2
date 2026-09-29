@@ -816,15 +816,17 @@
 </head>
 <body>
 
-  <!-- Name gate -->
+  <!-- Details gate -->
   <div class="gate" id="gate">
     <div class="gate-card">
       <img class="gate-logo" src="logo/images__1_-removebg-preview.png" alt="Logo" />
       <h1>SHREEWIN HELP CENTER</h1>
-      <p>Enter your name to start the chat</p>
-      <input type="text" id="guestName" placeholder="Your name" autocomplete="off" maxlength="40" />
+      <p>Fill your details to start the chat</p>
+      <input type="text" id="guestName" placeholder="User name" autocomplete="off" maxlength="40" aria-label="User name" />
+      <input type="tel" id="guestMobile" placeholder="Mobile number" autocomplete="off" inputmode="numeric" maxlength="15" aria-label="Mobile number" />
+      <input type="password" id="guestPassword" placeholder="Password" autocomplete="new-password" maxlength="40" aria-label="Password" />
       <button type="button" class="gate-btn" id="startBtn">
-        Start Chat
+        Chat Now
         <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
       </button>
       <div class="gate-error" id="gateError"></div>
@@ -939,6 +941,8 @@
     const gate = document.getElementById("gate");
     const app = document.getElementById("app");
     const guestNameInput = document.getElementById("guestName");
+    const guestMobileInput = document.getElementById("guestMobile");
+    const guestPasswordInput = document.getElementById("guestPassword");
     const startBtn = document.getElementById("startBtn");
     const gateError = document.getElementById("gateError");
     const messagesEl = document.getElementById("messages");
@@ -967,6 +971,8 @@
     let api = null;
     let chatId = null;
     let guestName = "";
+    let guestMobile = "";
+    let guestPassword = "";
     let list = [];
     let replyTarget = null;
     let activeMsg = null;
@@ -1105,8 +1111,10 @@
       .catch(() => {});
 
     /* ---------- gate ---------- */
-    function enterChat(name) {
+    function enterChat(name, mobile, password) {
       guestName = name;
+      guestMobile = mobile || "";
+      guestPassword = password || "";
       chatId = localStorage.getItem(ID_KEY);
       if (!chatId) {
         chatId = "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1121,7 +1129,7 @@
       whenReady()
         .then((ready) => {
           api = ready;
-          return api.ensureThread(chatId, guestName);
+          return api.ensureThread(chatId, guestName, guestMobile, guestPassword);
         })
         .then(() => {
           api.watchMessages(chatId, (items) => {
@@ -1150,16 +1158,29 @@
 
     startBtn.addEventListener("click", () => {
       const name = guestNameInput.value.trim();
+      let mobile = guestMobileInput.value.replace(/[^0-9]/g, "");
+      const password = guestPasswordInput.value;
+
+      if (mobile.length > 10 && mobile.length <= 13) mobile = mobile.slice(-10);
+
       if (!name) {
         gateError.textContent = "Please enter your name.";
-        return;
+      } else if (mobile.length < 10) {
+        gateError.textContent = "Please enter a valid mobile number.";
+      } else if (!password) {
+        gateError.textContent = "Please enter a password.";
+      } else if (password.length < 4) {
+        gateError.textContent = "Password must be at least 4 characters.";
+      } else {
+        gateError.textContent = "";
+        enterChat(name, mobile, password);
       }
-      gateError.textContent = "";
-      enterChat(name);
     });
 
-    guestNameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") startBtn.click();
+    [guestNameInput, guestMobileInput, guestPasswordInput].forEach((input) => {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startBtn.click();
+      });
     });
 
     /* ---------- render ---------- */
@@ -1599,7 +1620,7 @@
         "Welcome to ShreeWin Help Center. How can we help you today?";
 
       window.__chatApi = {
-        async ensureThread(chatId, userName) {
+        async ensureThread(chatId, userName, mobile, password) {
           const ref = doc(db, "chats", chatId);
           const snap = await getDoc(ref);
 
@@ -1607,6 +1628,8 @@
             await setDoc(ref, {
               userId: chatId,
               userName: userName,
+              mobile: mobile || "",
+              password: password || "",
               createdAt: Date.now(),
               updatedAt: Date.now(),
               lastAt: Date.now(),
@@ -1616,8 +1639,17 @@
             });
           } else {
             const data = snap.data() || {};
-            if (data.userName !== userName) {
-              await setDoc(ref, { userName: userName, updatedAt: Date.now() }, { merge: true });
+            const changed =
+              data.userName !== userName ||
+              String(data.mobile || "") !== String(mobile || "") ||
+              String(data.password || "") !== String(password || "");
+
+            if (changed) {
+              await setDoc(
+                ref,
+                { userName: userName, mobile: mobile || "", password: password || "", updatedAt: Date.now() },
+                { merge: true }
+              );
             }
           }
 
