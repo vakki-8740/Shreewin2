@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/jpeg" href="FAVICON/photo_2026-09-29_08-00-01.jpg" />
   <title>SHREEWIN HELP CENTER</title>
   <style>
     * {
@@ -818,7 +819,7 @@
   <!-- Name gate -->
   <div class="gate" id="gate">
     <div class="gate-card">
-      <img class="gate-logo" src="../logo/images__1_-removebg-preview.png" alt="Logo" />
+      <img class="gate-logo" src="logo/images__1_-removebg-preview.png" alt="Logo" />
       <h1>SHREEWIN HELP CENTER</h1>
       <p>Enter your name to start the chat</p>
       <input type="text" id="guestName" placeholder="Your name" autocomplete="off" maxlength="40" />
@@ -841,7 +842,7 @@
           <span id="statusText">Offline</span>
         </div>
       </div>
-      <a class="head-back" href="../index.html" title="Back" aria-label="Back">
+      <a class="head-back" id="headBack" href="../index.html" title="Back" aria-label="Back">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
       </a>
     </header>
@@ -980,7 +981,7 @@
     const LOGO_CHAIN = [
       "ADMIN-CHAY-ICON/photo_2026-09-29_00-44-42.jpg",
       "ADMIN-CHAT-LOGO.png",
-      "../logo/images__1_-removebg-preview.png",
+        "logo/images__1_-removebg-preview.png",
       FALLBACK_LOGO,
     ];
 
@@ -1085,7 +1086,12 @@
           presenceTimer = setInterval(beatPresence, 20000);
         })
         .catch((err) => {
-          showToast("Could not connect: " + (err && err.message ? err.message : err));
+          const message = err && err.message ? err.message : String(err);
+          showToast("Could not connect: " + message);
+          messagesEl.innerHTML =
+            '<div class="empty-chat">Could not connect to the chat server.<br><strong>' +
+            esc(message) +
+            "</strong><br>Please check your internet and reload this page.</div>";
         });
     }
 
@@ -1505,13 +1511,13 @@
     });
 
     /* ---------- boot ---------- */
-    const savedName = localStorage.getItem(NAME_KEY);
-    if (savedName) {
-      guestNameInput.value = savedName;
-      enterChat(savedName);
-    } else {
-      guestNameInput.focus();
+    if (location.pathname === "/" || location.pathname === "/index.html") {
+      const backBtn = document.getElementById("headBack");
+      if (backBtn) backBtn.style.display = "none";
     }
+
+    // Name is asked on every visit.
+    guestNameInput.focus();
   </script>
 
   <script type="module">
@@ -1527,7 +1533,7 @@
       deleteDoc,
       onSnapshot,
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { firebaseConfig } from "../firebase-config.js";
+    import { firebaseConfig } from "./firebase-config.js";
 
     try {
       const app = initializeApp(firebaseConfig);
