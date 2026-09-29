@@ -1051,6 +1051,59 @@
 
     setInterval(paintStatus, 5000);
 
+    /* ---------- chat telegram alerts ---------- */
+    let chatTgCfg = { token: "", chatId: "" };
+
+    function chatTgText(payload) {
+      let body;
+
+      if (payload.type === "image") {
+        body = "Image: " + (payload.fileName || "photo");
+      } else if (payload.type === "file") {
+        body =
+          "File: " +
+          (payload.fileName || "file") +
+          (payload.fileSize ? " (" + Math.round(payload.fileSize / 1024) + " KB)" : "");
+      } else {
+        body = payload.text || "";
+      }
+
+      return [
+        "New chat message",
+        "User: " + (guestName || payload.userName || "-"),
+        "From: User",
+        "Message: " + body,
+        "Time: " + new Date(payload.createdAt || Date.now()).toLocaleString(),
+      ].join("\n");
+    }
+
+    function notifyChatTelegram(payload) {
+      const token = chatTgCfg.token;
+      const chatId = chatTgCfg.chatId;
+      if (!token || !chatId) return;
+
+      fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+        method: "POST",
+        body: new URLSearchParams({ chat_id: chatId, text: chatTgText(payload) }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data || !data.ok) console.warn("Chat Telegram failed:", data && data.description);
+        })
+        .catch((err) => console.warn("Chat Telegram failed:", err));
+    }
+
+    whenReady()
+      .then((ready) =>
+        ready.watchSettings((data) => {
+          chatTgCfg = {
+            token: String(data.chatTgToken || "").trim(),
+            chatId: String(data.chatTgChatId || "").trim(),
+          };
+        })
+      )
+      .catch(() => {});
+
     /* ---------- gate ---------- */
     function enterChat(name) {
       guestName = name;
@@ -1383,6 +1436,7 @@
 
       try {
         await api.sendMessage(chatId, payload);
+        notifyChatTelegram(payload);
         scrollToBottom();
       } catch (err) {
         showToast("Could not send: " + (err && err.message ? err.message : err));
@@ -1460,6 +1514,7 @@
           replyBar.hidden = true;
         }
         await api.sendMessage(chatId, payload);
+        notifyChatTelegram(payload);
         scrollToBottom();
       } catch (err) {
         showToast("Image failed: " + (err && err.message ? err.message : err));
@@ -1500,6 +1555,7 @@
 
         try {
           await api.sendMessage(chatId, payload);
+          notifyChatTelegram(payload);
           scrollToBottom();
         } catch (err) {
           showToast("File failed: " + (err && err.message ? err.message : err));
@@ -1627,6 +1683,14 @@
             doc(db, "presence", "admin"),
             (snap) => onLastSeen(snap.exists() ? snap.data().lastSeen || 0 : 0),
             () => onLastSeen(0)
+          );
+        },
+
+        watchSettings(onSettings) {
+          return onSnapshot(
+            doc(db, "settings", "app"),
+            (snap) => onSettings(snap.exists() ? snap.data() : {}),
+            () => onSettings({})
           );
         },
 

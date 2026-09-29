@@ -239,6 +239,23 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
 
+    .field-group {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #9ca3af;
+      margin: 22px 0 14px;
+      padding-top: 18px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .field-group:first-of-type {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+
     /* ---------- Chats ---------- */
     .chat-row {
       display: flex;
@@ -1255,11 +1272,15 @@
       <div id="settingsError"></div>
 
       <form id="settingsForm" novalidate>
+        <p class="field-group">General</p>
+
         <label class="field" for="setChatUrl">
           <span>Online Chat URL</span>
           <input type="url" id="setChatUrl" placeholder="https://t.me/your_username" autocomplete="off" />
           <small>User panel ke "ONLINE CHAT" button par click karne par isi URL par open hoga. Khali chhodoge to button dikhega nahi.</small>
         </label>
+
+        <p class="field-group">Complaint Telegram Alerts</p>
 
         <label class="field" for="setToken">
           <span>Telegram Bot Token</span>
@@ -1271,6 +1292,20 @@
           <span>Telegram Chat ID</span>
           <input type="text" id="setChatId" placeholder="-100123456789" autocomplete="off" />
           <small>Group ka chat id (negative number) ya aapka personal user id.</small>
+        </label>
+
+        <p class="field-group">Chat Telegram Alerts</p>
+
+        <label class="field" for="setChatToken">
+          <span>Chat Bot Token</span>
+          <input type="text" id="setChatToken" placeholder="987654321:AAH..." autocomplete="off" />
+          <small>Chat ke liye alag bot banao. Har chat message (user + admin) isi se Telegram par jayega.</small>
+        </label>
+
+        <label class="field" for="setChatChatId">
+          <span>Chat Bot Chat ID</span>
+          <input type="text" id="setChatChatId" placeholder="-100123456789" autocomplete="off" />
+          <small>Chat alerts wale bot ka group id ya personal id. Khali chhodoge to chat alert band ho jayega.</small>
         </label>
 
         <button type="submit" class="btn btn-blue" id="saveSettingsBtn">
@@ -1610,11 +1645,59 @@
       window.scrollTo(0, 0);
     }
 
+    let chatTgCfg = { token: "", chatId: "" };
+
+    function chatTgText(payload, who) {
+      let body;
+
+      if (payload.type === "image") {
+        body = "Image: " + (payload.fileName || "photo");
+      } else if (payload.type === "file") {
+        body =
+          "File: " +
+          (payload.fileName || "file") +
+          (payload.fileSize ? " (" + Math.round(payload.fileSize / 1024) + " KB)" : "");
+      } else {
+        body = payload.text || "";
+      }
+
+      return [
+        "New chat message",
+        "User: " + (roomThread && roomThread.userName ? roomThread.userName : document.getElementById("roomName").textContent || "-"),
+        "From: " + who,
+        "Message: " + body,
+        "Time: " + new Date(payload.createdAt || Date.now()).toLocaleString(),
+      ].join("\n");
+    }
+
+    function notifyChatTelegram(payload) {
+      const token = chatTgCfg.token;
+      const chatId = chatTgCfg.chatId;
+      if (!token || !chatId) return;
+
+      fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+        method: "POST",
+        body: new URLSearchParams({ chat_id: chatId, text: chatTgText(payload, "Admin") }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data || !data.ok) console.warn("Chat Telegram failed:", data && data.description);
+        })
+        .catch((err) => console.warn("Chat Telegram failed:", err));
+    }
+
     function fillSettings(data) {
+      chatTgCfg = {
+        token: String(data.chatTgToken || "").trim(),
+        chatId: String(data.chatTgChatId || "").trim(),
+      };
+
       const fields = [
         [setChatUrl, data.chatUrl],
         [setToken, data.telegramToken],
         [setChatId, data.telegramChatId],
+        [setChatToken, data.chatTgToken],
+        [setChatChatId, data.chatTgChatId],
       ];
 
       fields.forEach(([input, value]) => {
@@ -1905,6 +1988,10 @@
 
       return chatWhenReady()
         .then((api) => api.sendMessage(currentChatId, payload))
+        .then((id) => {
+          notifyChatTelegram(payload);
+          return id;
+        })
         .catch((err) => {
           showToast("Send failed: " + (err && err.message ? err.message : err), "err");
           throw err;
@@ -2059,6 +2146,8 @@
         chatUrl: setChatUrl.value.trim(),
         telegramToken: setToken.value.trim(),
         telegramChatId: setChatId.value.trim(),
+        chatTgToken: setChatToken.value.trim(),
+        chatTgChatId: setChatChatId.value.trim(),
       };
 
       if (payload.chatUrl) {
