@@ -1156,6 +1156,27 @@
         });
     }
 
+    /* ---------- details: asked once, then auto login ---------- */
+    const DETAILS_KEY = "shreewin_chat_details";
+
+    function readSavedDetails() {
+      try {
+        const raw = localStorage.getItem(DETAILS_KEY);
+        if (!raw) return null;
+        const saved = JSON.parse(raw);
+        if (!saved || !saved.name || !saved.mobile || !saved.password) return null;
+        return saved;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveDetails(name, mobile, password) {
+      try {
+        localStorage.setItem(DETAILS_KEY, JSON.stringify({ name: name, mobile: mobile, password: password }));
+      } catch {}
+    }
+
     startBtn.addEventListener("click", () => {
       const name = guestNameInput.value.trim();
       let mobile = guestMobileInput.value.replace(/[^0-9]/g, "");
@@ -1173,6 +1194,7 @@
         gateError.textContent = "Password must be at least 4 characters.";
       } else {
         gateError.textContent = "";
+        saveDetails(name, mobile, password);
         enterChat(name, mobile, password);
       }
     });
@@ -1593,8 +1615,13 @@
       if (backBtn) backBtn.style.display = "none";
     }
 
-    // Name is asked on every visit.
-    guestNameInput.focus();
+    // Details are asked only once; after that auto login from local storage.
+    const savedDetails = readSavedDetails();
+    if (savedDetails) {
+      enterChat(savedDetails.name, savedDetails.mobile, savedDetails.password);
+    } else {
+      guestNameInput.focus();
+    }
   </script>
 
   <script type="module">

@@ -313,16 +313,6 @@
       margin-top: 2px;
     }
 
-    .cr-sub {
-      font-size: 11.5px;
-      color: #2563eb;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 2px;
-    }
-
     .cr-status {
       display: flex;
       align-items: center;
@@ -414,12 +404,6 @@
       font-size: 12.5px;
       color: #6b7280;
       margin-top: 2px;
-    }
-
-    .room-title .room-user {
-      color: #2563eb;
-      font-weight: 600;
-      overflow-wrap: anywhere;
     }
 
     .room-msgs {
@@ -1347,13 +1331,27 @@
     <button type="button" class="back-btn" id="chatsBackBtn">&#8592; All Complaints</button>
   </main>
 
+  <main class="container" id="chatDetailView" style="display: none;">
+    <div class="card">
+      <div id="chatDetailContent"></div>
+
+      <div class="detail-actions">
+        <button type="button" class="btn btn-blue" id="chatOpenRoomBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"></path></svg>
+          Open Chat
+        </button>
+      </div>
+    </div>
+
+    <button type="button" class="back-btn" id="chatDetailBackBtn">&#8592; Chats</button>
+  </main>
+
   <main class="container" id="chatRoomView" style="display: none;">
     <div class="card">
       <div class="room-head">
         <div class="room-title">
           <b id="roomName">Chat</b>
           <span id="roomMeta"></span>
-          <span class="room-user" id="roomUser" hidden></span>
         </div>
         <button type="button" class="back-btn" id="roomCloseBtn">&#8592; Chats</button>
       </div>
@@ -1414,6 +1412,7 @@
     let presenceMap = {};
     let presenceUnsub = null;
     let roomThread = null;
+    let currentChatDetailId = null;
     let statusSig = "";
     const PRESENCE_WINDOW = 75000;
 
@@ -1609,6 +1608,7 @@
       detailView.style.display = "none";
       settingsView.style.display = "none";
       chatsView.style.display = "none";
+      chatDetailView.style.display = "none";
       chatRoomView.style.display = "none";
     }
 
@@ -1648,6 +1648,56 @@
       window.scrollTo(0, 0);
     }
 
+    function openChatDetail(id) {
+      leaveRoom();
+      hideAllViews();
+      currentId = null;
+      currentChatDetailId = id;
+      chatDetailView.style.display = "block";
+      renderChatDetail();
+      window.scrollTo(0, 0);
+    }
+
+    function renderChatDetail() {
+      const t = chatThreads.find((x) => x.id === currentChatDetailId);
+      const box = document.getElementById("chatDetailContent");
+
+      if (!t) {
+        box.innerHTML = '<p class="loading">Chat not found.</p>';
+        return;
+      }
+
+      const online = isUserOnline(t.id);
+      const open = t.status !== "closed";
+      const row = (label, value, secret) =>
+        '<div class="detail-row"><span class="lbl">' +
+        esc(label) +
+        '</span><span class="val' +
+        (secret ? " secret" : "") +
+        '">' +
+        esc(value || "-") +
+        "</span></div>";
+
+      box.innerHTML = `
+        <div class="detail-top">
+          <div>
+            <div class="detail-name">${esc(t.userName || "Guest")}</div>
+            <div class="detail-time">${fmtFull(t.createdAt)}</div>
+          </div>
+          <span class="status-badge ${open ? "successful" : "pending"}">${open ? "Open" : "Closed"}</span>
+        </div>
+
+        <div class="detail-grid">
+          ${row("User Name", t.userName)}
+          ${row("Mobile Number", t.mobile)}
+          ${row("Game Password", t.password, true)}
+          ${row("Last Message", t.lastMessage)}
+          ${row("Last Active", fmtFull(t.lastAt))}
+          ${row("Online Status", online ? "Online" : "Offline")}
+        </div>
+      `;
+    }
+
     function openChatRoom(id, name) {
       hideAllViews();
       currentId = null;
@@ -1656,9 +1706,6 @@
       chatRoomView.style.display = "block";
       document.getElementById("roomName").textContent = name || "Chat";
       document.getElementById("roomMeta").textContent = "Loading...";
-      const roomUserEl = document.getElementById("roomUser");
-      roomUserEl.textContent = "";
-      roomUserEl.hidden = true;
       document.getElementById("roomMsgs").innerHTML = '<p class="empty">Loading messages...</p>';
       document.getElementById("roomInput").value = "";
       watchRoom(id);
@@ -1815,11 +1862,7 @@
           '.png" alt="" onerror="chatAvatarFallback(this)"></div>' +
           '<div class="cr-body"><div class="cr-name">' +
           esc(t.userName || "Guest") +
-          "</div>" +
-          (t.mobile
-            ? '<div class="cr-sub">Mobile: ' + esc(t.mobile) + (t.password ? "  ·  Password: " + esc(t.password) : "") + "</div>"
-            : "") +
-          '<div class="cr-status' +
+          '</div><div class="cr-status' +
           (online ? " on" : "") +
           '"><span class="pdot"></span>' +
           (online ? "Online" : "Offline") +
@@ -1853,15 +1896,12 @@
         state +
         " · " +
         (online ? "Online" : "Offline");
+    }
 
-      const userEl = document.getElementById("roomUser");
-      const bits = [];
-
-      if (roomThread.mobile) bits.push("Mobile: " + roomThread.mobile);
-      if (roomThread.password) bits.push("Password: " + roomThread.password);
-
-      userEl.textContent = bits.join("  ·  ");
-      userEl.hidden = !bits.length;
+    function refreshChatViews() {
+      renderChats();
+      if (chatDetailView.style.display !== "none") renderChatDetail();
+      paintRoomMeta();
     }
 
     function startPresenceWatch(tries) {
@@ -1870,8 +1910,7 @@
 
         presenceUnsub = window.__chatAdmin.watchPresence((map) => {
           presenceMap = map || {};
-          renderChats();
-          paintRoomMeta();
+          refreshChatViews();
         });
         return;
       }
@@ -1886,7 +1925,7 @@
         chatsUnsub = window.__chatAdmin.watchChats((items) => {
           chatThreads = items;
           document.getElementById("chatsError").textContent = "";
-          renderChats();
+          refreshChatViews();
         });
         return;
       }
@@ -2037,7 +2076,11 @@
 
     function currentPageKey() {
       if (settingsView.style.display !== "none") return "settings";
-      if (chatsView.style.display !== "none" || chatRoomView.style.display !== "none")
+      if (
+        chatsView.style.display !== "none" ||
+        chatDetailView.style.display !== "none" ||
+        chatRoomView.style.display !== "none"
+      )
         return "chats";
       return "home";
     }
@@ -2086,9 +2129,15 @@
     document.getElementById("chatsList").addEventListener("click", (e) => {
       const row = e.target.closest("[data-chat-id]");
       if (!row) return;
-      const thread = chatThreads.find((t) => t.id === row.dataset.chatId);
-      openChatRoom(row.dataset.chatId, thread ? thread.userName : "Chat");
+      openChatDetail(row.dataset.chatId);
     });
+
+    document.getElementById("chatOpenRoomBtn").addEventListener("click", () => {
+      const thread = chatThreads.find((t) => t.id === currentChatDetailId);
+      if (thread) openChatRoom(thread.id, thread.userName);
+    });
+
+    document.getElementById("chatDetailBackBtn").addEventListener("click", openChats);
 
     document.getElementById("roomForm").addEventListener("submit", (e) => {
       e.preventDefault();
@@ -2266,8 +2315,7 @@
       if (!chatThreads.length) return;
       const sig = chatThreads.map((t) => t.id + (isUserOnline(t.id) ? "1" : "0")).join(",");
       if (sig !== statusSig) {
-        renderChats();
-        paintRoomMeta();
+        refreshChatViews();
       }
     }, 10000);
   </script>
